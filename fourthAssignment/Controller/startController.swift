@@ -11,35 +11,106 @@ class startController: UIViewController {
     
     //MARK: - Properties
     @IBOutlet weak var background: UIImageView!
+    @IBOutlet weak var snailButton: UIButton!
+    @IBOutlet weak var rabbitButton: UIButton!
+    @IBOutlet weak var dogButton: UIButton!
+    @IBOutlet weak var startButton: UIButton!
+    
     let playVC = playingController()
     
     var land:UIImageView!
     var hover:CABasicAnimation!
+    var buttonSender = UIButton()
     
     var selectedCharacter = ""
     var selectedSpeed = 0
     var selectedHeart = 0
+    var selectedBackground = ""
+    
+    
+    //want to make only one character to be selected and change the image when selected
+//    func selected() {
+//        switch buttonSender {
+//        case snailButton:
+//            snailButton.isSelected = true
+//            rabbitButton.isSelected = false
+//            dogButton.isSelected = false
+//
+//            selectedCharacter = "snail"
+//            selectedSpeed = 5
+//            selectedHeart = 5
+//
+//        case rabbitButton:
+//            snailButton.isSelected = true
+//            rabbitButton.isSelected = false
+//            dogButton.isSelected = false
+//
+//
+//
+//        case dogButton:
+//            dogButton.isSelected = true
+//            snailButton.isSelected = false
+//            rabbitButton.isSelected = false
+//
+//        default:
+//            print("Error")
+//        }
+//
+//
+//        if buttonSender.isSelected == true {
+//            buttonSender.imageView?.image = UIImage(named:"\(selectedCharacter).1")
+//        } else {
+//            buttonSender.imageView?.image = UIImage(named:"\(selectedCharacter).0")
+//        }
+//    }
+    
     
     @IBAction func snailSelected(_ sender: UIButton) {
+        snailButton.isSelected = true
+        rabbitButton.isSelected = false
+        dogButton.isSelected = false
+
+        buttonSender = snailButton
         selectedCharacter = "snail"
-        selectedSpeed = 5
+        selectedSpeed = 5000
         selectedHeart = 5
+        selectedBackground = "background3"
+        //selected()
     }
     @IBAction func rabbitSelected(_ sender: UIButton) {
+        buttonSender = rabbitButton
         selectedCharacter = "rabbit"
-        selectedSpeed = 10
+        selectedSpeed = 3000
         selectedHeart = 3
+        selectedBackground = "background1"
+        //selected()
     }
     @IBAction func dogSelected(_ sender: UIButton) {
+        buttonSender = dogButton
         selectedCharacter = "dog"
-        selectedSpeed = 15
+        selectedSpeed = 1500
         selectedHeart = 2
-        
+        selectedBackground = "background4"
+        //selected()
+
     }
     
     
     
     //MARK: - Actions
+    
+    func moveIt(_ imageView: UIImageView,_ speed:CGFloat) {
+        let speeds = speed
+        let imageSpeed = speeds / view.frame.size.width
+        let averageSpeed = (view.frame.size.width - imageView.frame.origin.x) * imageSpeed
+        UIView.animate(withDuration: TimeInterval(averageSpeed), delay: 0.0, options: [.curveLinear, .repeat], animations: { //
+            imageView.frame.origin.x = self.view.frame.size.width - (imageView.frame.size.width)//1416 - (self.view.frame.size.width)
+        }, completion:
+            {
+                (_) in
+                imageView.frame.origin.x = -imageView.frame.size.width + self.view.frame.size.width
+            })
+    }
     
     
     //datapass to playingVC
@@ -48,6 +119,14 @@ class startController: UIViewController {
         playVC.currentCharacter = selectedCharacter
         playVC.currentSpeed = selectedSpeed
         playVC.currentHeart = selectedHeart
+        playVC.currentBackground = selectedBackground
+        
+//        want to make the button unable to press if you didn't select character
+//        if selectedCharacter == "" {
+//            sender.isEnabled = false
+//            print("select the character before you start")
+//        }
+
         
         //print("your status is \(selectedCharacter) character, \(selectedSpeed) speed, \(selectedHeart) hearts")
         
@@ -59,16 +138,16 @@ class startController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //make the background move from RtoL
-        land = background //UIImageView(image: UIImage(named: "background"))
-        //land.frame = CGRect(x: 0, y: 0, width: 375.0, height: 666.0)
+        moveIt(background, 10)
+        startButton.layer.cornerRadius = 15
+        startButton.layer.borderWidth = 1.0
         
-        UIView.animate(withDuration: 40, delay: 0, options: [.repeat, .curveLinear], animations: { //, .autoreverse
-            self.land.frame.origin.x = self.view.bounds.width - self.land.frame.width + 400
-            //이어지게 하고싶은데 어떻게 해야되는거지,,
-            //back 누르면 안움직이는데,,?
-        }, completion: nil)
-        self.view.insertSubview(land, aboveSubview: background)
+
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        moveIt(background, 10)
+        
     }
     
     //MARK: - Helper
