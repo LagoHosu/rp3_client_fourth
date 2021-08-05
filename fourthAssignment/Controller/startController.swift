@@ -28,47 +28,12 @@ class startController: UIViewController {
     var selectedBackground = ""
     
     
-    //want to make only one character to be selected and change the image when selected
-//    func selected() {
-//        switch buttonSender {
-//        case snailButton:
-//            snailButton.isSelected = true
-//            rabbitButton.isSelected = false
-//            dogButton.isSelected = false
-//
-//            selectedCharacter = "snail"
-//            selectedSpeed = 5
-//            selectedHeart = 5
-//
-//        case rabbitButton:
-//            snailButton.isSelected = true
-//            rabbitButton.isSelected = false
-//            dogButton.isSelected = false
-//
-//
-//
-//        case dogButton:
-//            dogButton.isSelected = true
-//            snailButton.isSelected = false
-//            rabbitButton.isSelected = false
-//
-//        default:
-//            print("Error")
-//        }
-//
-//
-//        if buttonSender.isSelected == true {
-//            buttonSender.imageView?.image = UIImage(named:"\(selectedCharacter).1")
-//        } else {
-//            buttonSender.imageView?.image = UIImage(named:"\(selectedCharacter).0")
-//        }
-//    }
-    
-    
     @IBAction func snailSelected(_ sender: UIButton) {
-        snailButton.isSelected = true
-        rabbitButton.isSelected = false
-        dogButton.isSelected = false
+        //looks heavy
+        snailButton.setImage( UIImage.init(named: "snail/1"), for: .normal)
+        rabbitButton.setImage( UIImage.init(named: "rabbit/0"), for: .normal)
+        dogButton.setImage( UIImage.init(named: "dog/0"), for: .normal)
+
 
         buttonSender = snailButton
         selectedCharacter = "snail"
@@ -78,14 +43,22 @@ class startController: UIViewController {
         //selected()
     }
     @IBAction func rabbitSelected(_ sender: UIButton) {
+        snailButton.setImage( UIImage.init(named: "snail/0"), for: .normal)
+        rabbitButton.setImage( UIImage.init(named: "rabbit/1"), for: .normal)
+        dogButton.setImage( UIImage.init(named: "dog/0"), for: .normal)
+        
         buttonSender = rabbitButton
         selectedCharacter = "rabbit"
-        selectedSpeed = 3000
+        selectedSpeed = 4000
         selectedHeart = 3
         selectedBackground = "background1"
         //selected()
     }
     @IBAction func dogSelected(_ sender: UIButton) {
+        snailButton.setImage( UIImage.init(named: "snail/0"), for: .normal)
+        rabbitButton.setImage( UIImage.init(named: "rabbit/0"), for: .normal)
+        dogButton.setImage( UIImage.init(named: "dog/1"), for: .normal)
+        
         buttonSender = dogButton
         selectedCharacter = "dog"
         selectedSpeed = 1500
@@ -121,14 +94,6 @@ class startController: UIViewController {
         playVC.currentHeart = selectedHeart
         playVC.currentBackground = selectedBackground
         
-//        want to make the button unable to press if you didn't select character
-//        if selectedCharacter == "" {
-//            sender.isEnabled = false
-//            print("select the character before you start")
-//        }
-
-        
-        //print("your status is \(selectedCharacter) character, \(selectedSpeed) speed, \(selectedHeart) hearts")
         
         self.navigationController?.pushViewController(playVC, animated: true)
     }

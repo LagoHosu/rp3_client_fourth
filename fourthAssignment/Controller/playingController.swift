@@ -16,6 +16,7 @@ class playingController: UIViewController {
     @IBOutlet weak var coinLabel: UILabel!
     @IBOutlet weak var background: UIImageView!
     
+    @IBOutlet weak var jumpButton: UIButton!
     @IBOutlet weak var showResult: UIButton!
     var barVC = customNavigationBarController()
     var buttonClicked : Int = 0
@@ -29,10 +30,11 @@ class playingController: UIViewController {
     
     var coinPosition = CGFloat()
     
-    let randomTime = Int(arc4random_uniform(4))
-
+    let randomTime = Double(arc4random_uniform(4))
+    
     var heartStatus = 0
     var coinStatus = 0
+    var delayTime = 0.0
     
     
     //MARK: - Actions
@@ -60,7 +62,7 @@ class playingController: UIViewController {
     @IBAction func jumpClicked(_ sender: UIButton) {
         //make the character jump
         //animation part makes move, and completion part let the object after moved
-        UIView.animate(withDuration: 0.4,
+        UIView.animate(withDuration: 0.6,
                        delay: 0.0,
                        options: [.curveEaseInOut , .allowUserInteraction, .autoreverse],
                        animations: {
@@ -69,6 +71,37 @@ class playingController: UIViewController {
                         self.character1.center = CGPoint(x: 100 ,y: 710)
                        })
         
+        //make the coinStatus plus1 when it jumped and coin is in the area
+        let currentCoinLocation = coin1.layer.presentation()!.frame
+        if currentCoinLocation.minX < 130 && currentCoinLocation.minX > 50 {
+            self.coinStatus += 1
+            print("current coinStatus = \(coinStatus)")
+            //where should it go,,,
+            coin1.alpha = 0
+        }
+        //let the coinlabel text changed when the coisntatus get plused
+        DispatchQueue.main.async {
+            // change label text after second calling.
+            self.coinLabel.text = "X \(self.coinStatus)"
+        }
+        
+        //make the heart number decreased
+        let currentGasLocation = gas1.layer.presentation()!.frame
+        if currentGasLocation.minX < 130 && currentGasLocation.minX > 50 && self.character1.layer.presentation()!.frame.midY > 680 { //character.midY = 715, character.midX = 100
+            self.heartStatus -= 1
+            print("current heartStatus = \(heartStatus)")
+//            //where should it go,,,
+//            gas1.alpha = 0
+        }
+        
+        DispatchQueue.main.async {
+            // change label text after second calling.
+            self.heartLabel.text = "X \(self.heartStatus)"
+        }
+        
+        if heartStatus == 0 {
+            goResult()
+        }
     }
     
     //to set the imageView to be animated
@@ -91,21 +124,42 @@ class playingController: UIViewController {
         sender.image = sender.animationImages?.first
         sender.startAnimating()
     }
-
     
     
-    func moveObjects(_ imageView: UIImageView, _ speed: CGFloat) {
+    
+    func moveCoinObjects(imageView: UIImageView, speed: CGFloat, delayTime: Double) {
+        var delay = Double(arc4random_uniform(3))
         let speeds = speed
         let imageSpeed = speeds / view.frame.size.width
         let averageSpeed = (view.frame.size.width - imageView.frame.origin.x) * imageSpeed
-        UIView.animate(withDuration: TimeInterval(averageSpeed), delay: 0.0, options: .curveLinear, animations: {
-            self.coinPosition = imageView.frame.origin.x
+        print(delayTime, "is delay time")
+        UIView.animate(withDuration: TimeInterval(averageSpeed), delay: delay, options: [.repeat, .curveLinear], animations: { //.repeat,
             imageView.frame.origin.x = imageView.frame.size.width - self.view.frame.size.width
+            print(imageView.layer.presentation()!.frame, " is \(imageView)'s frame value")
+            print(delay, "is random delay time now")
         }, completion:
             { (_) in
-                imageView.frame.origin.x = -(imageView.frame.size.width) + self.view.frame.size.width
-            //self.moveObjects2(imageView,speeds)
-        })
+                imageView.frame.origin.x = -(imageView.frame.size.width) - self.view.frame.size.width
+//                delay = Double(arc4random_uniform(3))
+            })
+    }
+    
+    func moveGasObjects(imageView: UIImageView, speed: CGFloat, delayTime: Double) {
+        var delay = Double(arc4random_uniform(3))
+        let speeds = speed
+        let imageSpeed = speeds / view.frame.size.width
+        let averageSpeed = (view.frame.size.width - imageView.frame.origin.x) * imageSpeed
+        print(delayTime, "is delay time")
+        UIView.animate(withDuration: TimeInterval(averageSpeed), delay: delay, options: [.repeat, .curveLinear], animations: { //.repeat,
+            //frame value = (x value, y value, width, height)
+            imageView.frame.origin.x = imageView.frame.size.width - self.view.frame.size.width
+            
+        }, completion:
+            { (_) in
+                imageView.frame.origin.x = -(imageView.frame.size.width) - self.view.frame.size.width
+                delay = Double(arc4random_uniform(3))
+            })
+        
     }
     
     
@@ -126,63 +180,74 @@ class playingController: UIViewController {
         barVC.navigationBar.setBackgroundImage(UIImage(), for: .default)
         barVC.navigationItem.hidesBackButton = true
         
+        jumpButton.layer.cornerRadius = 15
         
         character1.animationImages = animatedCharacter()
-        character1.animationDuration = 0.3
+        character1.animationDuration = 0.4
         character1.animationRepeatCount = 0
         character1.image = character1.animationImages?.first
         character1.startAnimating()
         
         background.image = UIImage(named: currentBackground)
-      
+        
         heartStatus = currentHeart
         
         heartLabel.text = "X \(heartStatus)"
         coinLabel.text = "X \(coinStatus)"
         
         
-        //about coin movement
+        //about object movement
         
-        //while절 안에 DispatchQueue 둘다 넣어버리고 랜덤으로 돌리자
-        //조건문 두개 만들어서 코인, 가스-하트 숫자 조정하기
-        //반복할거면 DispatchQueue를 안에 넣어야하는건가, 조건문이나 반복문 돌려봐야겠네
         DispatchQueue.main.async {
-            usleep(1500000)
+            usleep(700000)  //dispatchQueue로 대체,
             
-            self.moveObjects(self.coin1, CGFloat(self.currentSpeed))
-            print("position1 is \(self.coinPosition)")
-
+            self.moveCoinObjects(imageView: self.coin1, speed: CGFloat(self.currentSpeed), delayTime: self.randomTime)
             self.spinObject(objectName: "coin", sender: self.coin1)
-            usleep(useconds_t(self.randomTime))
-            //print(useconds_t(self.randomTime))
-
             
-
-
         }
         
         //about gas movement
         DispatchQueue.main.async {
-            usleep(1500000)
+            usleep(700000)
             
-            self.moveObjects(self.gas1, CGFloat(self.currentSpeed))
-
+            self.moveGasObjects(imageView: self.gas1, speed: CGFloat(self.currentSpeed), delayTime: self.randomTime)
             self.spinObject(objectName: "gas", sender: self.gas1)
-            //print(useconds_t(self.randomTime))
-            //usleep(useconds_t(randomTime))
-
+            
         }
-                
-        //let the result view appear
-        showResult.addTarget(self, action: #selector(goResult), for: .touchUpInside)
+        
+        //about heartStatus and get 0
+        DispatchQueue.main.async {
+            usleep(700001)
+            
+            //make the heartStatus minus1 when it touched
+            print("current coinStatus = \(self.coinStatus)")
+            
+        }
         
         
     }
+    
+    //want to make
+    override func viewWillAppear(_ animated: Bool) {
+        heartStatus = currentHeart
+        coinStatus = 0
+    }
+    
+    
+    
     @objc func goResult(){
         let alert = self.storyboard?.instantiateViewController(withIdentifier: "resultVC") as! resultController
         alert.modalPresentationStyle = .overCurrentContext
+        alert.getScore = coinStatus
+        alert.backgroundImage = currentBackground
         present(alert, animated: false, completion: nil)
     }
     
     
 }
+
+
+/* what should do is,,,
+     1. make the coin/gas disappear when the value changed
+     2. change the delay time in animation method every turn
+ */
